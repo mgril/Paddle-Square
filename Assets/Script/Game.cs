@@ -14,38 +14,74 @@ public class Game : MonoBehaviour
     [SerializeField, Min(2)]
 	int pointsToWin = 3;
 
-    void Awake ()
-    {
-        ball.StartNewGame();
-        bottomPaddle.StartNewGame();
-        topPaddle.StartNewGame();
-    } 
+    [SerializeField]
+	TextMeshPro countdownText;
 	
-	void Update ()
+	[SerializeField, Min(1f)]
+	float newGameDelay = 3f;
+
+	float countdownUntilNewGame;
+
+	void Awake () => countdownUntilNewGame = newGameDelay;
+
+    void StartNewGame ()
 	{
+		ball.StartNewGame();
+		bottomPaddle.StartNewGame();
+		topPaddle.StartNewGame();
+	}
+    void EndGame ()
+	{
+		countdownUntilNewGame = newGameDelay;
+		countdownText.SetText("GAME OVER");
+		countdownText.gameObject.SetActive(true);
+		ball.EndGame();
+	}
+	void Update() 
+    {
         bottomPaddle.Move(ball.Position.x, arenaExtents.x);
 		topPaddle.Move(ball.Position.x, arenaExtents.x);
+        if (countdownUntilNewGame <= 0f)
+		{
+			UpdateGame();
+		}
+		else
+		{
+			UpdateCountdown();
+		}
+    }
+	void UpdateGame  ()
+	{
 		ball.Move();
         BounceYIfNeeded();
         BounceXIfNeeded(ball.Position.x);
 		ball.UpdateVisualization();
+	} 
+    void UpdateCountdown ()
+	{
+		countdownUntilNewGame -= Time.deltaTime;
+        if (countdownUntilNewGame <= 0f)
+		{
+			countdownText.gameObject.SetActive(false);
+			StartNewGame();
+		}
+		else
+		{
+			float displayValue = Mathf.Ceil(countdownUntilNewGame);
+			if (displayValue < newGameDelay)
+			{
+				countdownText.SetText("{0}", displayValue);
+			}
+        }
+	}
+    public void EndGame ()
+	{
+		position.x = 0f;
+		gameObject.SetActive(false);
 	}
 
 
-    	void BounceXIfNeeded (float x)
-	{
-		float xExtents = arenaExtents.x - ball.Extents;
-		if (x < -xExtents)
-		{
-			ball.BounceX(-xExtents);
-		}
-		else if (x > xExtents)
-		{
-			ball.BounceX(xExtents);
-		}
-        
-	
-    }
+    // Bounces
 
     void BounceY (float boundary, Paddle defender, Paddle attacker)
     {
@@ -63,8 +99,22 @@ public class Game : MonoBehaviour
             ball.SetXPositionAndSpeed(bounceX, hitFactor, durationAfterBounce);
         }
         else if (attacker.ScorePoint(pointsToWin))
+        {
+			EndGame();
+		}
     }
-    
+    void BounceXIfNeeded (float x)
+	{
+		float xExtents = arenaExtents.x - ball.Extents;
+		if (x < -xExtents)
+		{
+			ball.BounceX(-xExtents);
+		}
+		else if (x > xExtents)
+		{
+			ball.BounceX(xExtents);
+		}
+    }
     void BounceYIfNeeded ()
 	{
 		float yExtents = arenaExtents.y - ball.Extents;
