@@ -6,7 +6,6 @@ public class Ball : MonoBehaviour
 	float
         maxXSpeed = 20f,
         maxStartXSpeed = 2f,
-		startXSpeed = 8f,
 		constantYSpeed = 10f,
         extents = 0.5f;
 

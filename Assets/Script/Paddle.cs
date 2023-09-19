@@ -6,8 +6,9 @@ public class Paddle : MonoBehaviour
 {
 	[SerializeField, Min(0f)]
 	float
-		extents = 4f,
-		speed = 10f;
+		minExtents = 4f,
+		maxExtents = 4f,
+		speed = 10f,
         maxTargetingBias = 0.75f;
 
     [SerializeField]
@@ -17,7 +18,12 @@ public class Paddle : MonoBehaviour
 	TextMeshPro scoreText;
 
     int score;
-    float targetingBias;
+    float extents, targetingBias;
+    
+    void Awake ()
+	{
+		SetScore(0);
+	}
 
     public void StartNewGame ()
 	{
@@ -25,18 +31,20 @@ public class Paddle : MonoBehaviour
         ChangeTargetingBias();
 	}
 
-    void SetScore (int newScore)
+    // Score 
+    void SetScore (int newScore, float pointsToWin = 1000f)
 	{
 		score = newScore;
 		scoreText.SetText("{0}", newScore);
+        SetExtents(Mathf.Lerp(maxExtents, minExtents, newScore / (pointsToWin - 1f)));
 	}
-
 	public bool ScorePoint (int pointsToWin)
 	{
-		SetScore(score + 1);
+		SetScore(score + 1, pointsToWin);
 		return score >= pointsToWin;
-	}
+	} 
 
+    //Moves
     public void Move (float target, float arenaExtents)
 	{
 		Vector3 p = transform.localPosition;
@@ -69,6 +77,7 @@ public class Paddle : MonoBehaviour
 		return x;
 	}
 
+
     public bool HitBall (float ballX, float ballExtents, out float hitFactor) // between [-1; 1]  if paddle hit the ball 
 	{
         ChangeTargetingBias();
@@ -80,5 +89,13 @@ public class Paddle : MonoBehaviour
 
     void ChangeTargetingBias () =>
 		targetingBias = Random.Range(-maxTargetingBias, maxTargetingBias);
+
+    void SetExtents (float newExtents)
+	{
+		extents = newExtents;
+		Vector3 s = transform.localScale; 
+		s.x = 2f * newExtents;
+		transform.localScale = s;
+	}
 
 }

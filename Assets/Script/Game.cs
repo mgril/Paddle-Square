@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class Game : MonoBehaviour 
 {
@@ -19,6 +20,8 @@ public class Game : MonoBehaviour
 	
 	[SerializeField, Min(1f)]
 	float newGameDelay = 3f;
+    [SerializeField]
+	LivelyCamera livelyCamera;
 
 	float countdownUntilNewGame;
 
@@ -74,12 +77,6 @@ public class Game : MonoBehaviour
 			}
         }
 	}
-    public void EndGame ()
-	{
-		position.x = 0f;
-		gameObject.SetActive(false);
-	}
-
 
     // Bounces
 
@@ -91,6 +88,7 @@ public class Game : MonoBehaviour
 
         BounceXIfNeeded(bounceX); //we take care of an X bounce only if it happened before the Y bounce
 		bounceX = ball.Position.x - ball.Velocity.x * durationAfterBounce;
+        livelyCamera.PushXZ(ball.Velocity);
         // original bounce 
         ball.BounceY(boundary);
         //check whether the defending paddle hit the ball
@@ -98,9 +96,13 @@ public class Game : MonoBehaviour
         {
             ball.SetXPositionAndSpeed(bounceX, hitFactor, durationAfterBounce);
         }
-        else if (attacker.ScorePoint(pointsToWin))
-        {
-			EndGame();
+        else
+		{
+			livelyCamera.JostleY();
+			if (attacker.ScorePoint(pointsToWin))
+			{
+				EndGame();
+			}
 		}
     }
     void BounceXIfNeeded (float x)
@@ -108,10 +110,12 @@ public class Game : MonoBehaviour
 		float xExtents = arenaExtents.x - ball.Extents;
 		if (x < -xExtents)
 		{
+            livelyCamera.PushXZ(ball.Velocity);
 			ball.BounceX(-xExtents);
 		}
 		else if (x > xExtents)
 		{
+            livelyCamera.PushXZ(ball.Velocity);
 			ball.BounceX(xExtents);
 		}
     }
