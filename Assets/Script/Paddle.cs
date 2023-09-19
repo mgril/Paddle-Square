@@ -1,4 +1,6 @@
 using UnityEngine;
+using TMPro;
+
 
 public class Paddle : MonoBehaviour 
 {
@@ -9,6 +11,28 @@ public class Paddle : MonoBehaviour
 
     [SerializeField]
 	bool isAI;
+
+    [SerializeField]
+	TextMeshPro scoreText;
+
+    int score;
+
+    public void StartNewGame ()
+	{
+		SetScore(0);
+	}
+
+    void SetScore (int newScore)
+	{
+		score = newScore;
+		scoreText.SetText("{0}", newScore);
+	}
+
+	public bool ScorePoint (int pointsToWin)
+	{
+		SetScore(score + 1);
+		return score >= pointsToWin;
+	}
 
     public void Move (float target, float arenaExtents)
 	{
@@ -48,5 +72,7 @@ public class Paddle : MonoBehaviour
 			(extents + ballExtents);
 		return -1f <= hitFactor && hitFactor <= 1f;
 	}
+
+    
 
 }
