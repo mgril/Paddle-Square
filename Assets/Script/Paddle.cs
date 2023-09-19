@@ -8,6 +8,7 @@ public class Paddle : MonoBehaviour
 	float
 		extents = 4f,
 		speed = 10f;
+        maxTargetingBias = 0.75f;
 
     [SerializeField]
 	bool isAI;
@@ -16,10 +17,12 @@ public class Paddle : MonoBehaviour
 	TextMeshPro scoreText;
 
     int score;
+    float targetingBias;
 
     public void StartNewGame ()
 	{
 		SetScore(0);
+        ChangeTargetingBias();
 	}
 
     void SetScore (int newScore)
@@ -44,6 +47,7 @@ public class Paddle : MonoBehaviour
 	}
     float AdjustByAI (float x, float target)    //stupid AI with no prediction , difficulty only depends on its speed
 	{
+        target += targetingBias * extents;
 		if (x < target)
 		{
 			return Mathf.Min(x + speed * Time.deltaTime, target);
@@ -67,12 +71,14 @@ public class Paddle : MonoBehaviour
 
     public bool HitBall (float ballX, float ballExtents, out float hitFactor) // between [-1; 1]  if paddle hit the ball 
 	{
+        ChangeTargetingBias();
 		hitFactor =
 			(ballX - transform.localPosition.x) /
 			(extents + ballExtents);
 		return -1f <= hitFactor && hitFactor <= 1f;
 	}
 
-    
+    void ChangeTargetingBias () =>
+		targetingBias = Random.Range(-maxTargetingBias, maxTargetingBias);
 
 }
